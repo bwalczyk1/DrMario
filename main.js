@@ -1,5 +1,6 @@
 "use strict";
 let main = {
+    GAMEOVER: false,
     load: function(){
         document.body.style.position = "relative";
         let tab = document.createElement("table");
