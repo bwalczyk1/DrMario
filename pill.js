@@ -5,8 +5,8 @@ let pill = {
     mainPositionY: 0,
     sidePositionX: 0,
     sidePositionY: 0,
-    color1: "white",
-    color2: "white",
+    color1: "",
+    color2: "",
     falling: false,
     pressingKey: false,
     gravity: false,
@@ -60,12 +60,24 @@ let pill = {
         this.color2 = this.randColor();
         document.getElementById(this.mainPositionX + "_" + this.mainPositionY).className = this.id.toString();
         document.getElementById(this.mainPositionX + "_" + this.mainPositionY).style.backgroundColor = this.color1;
+        if(this.color1 == "brown")
+            document.getElementById(this.mainPositionX + "_" + this.mainPositionY).style.backgroundImage = "url('img/br_left.png')";
+        else if(this.color1 == "yellow")
+            document.getElementById(this.mainPositionX + "_" + this.mainPositionY).style.backgroundImage = "url('img/yl_left.png')";
+        else if(this.color1 == "blue")
+            document.getElementById(this.mainPositionX + "_" + this.mainPositionY).style.backgroundImage = "url('img/bl_left.png')";
         document.getElementById(this.sidePositionX + "_" + this.sidePositionY).className = this.id.toString();
         document.getElementById(this.sidePositionX + "_" + this.sidePositionY).style.backgroundColor = this.color2;
+        if(this.color2 == "brown")
+            document.getElementById(this.sidePositionX + "_" + this.sidePositionY).style.backgroundImage = "url('img/br_right.png')";
+        else if(this.color2 == "yellow")
+            document.getElementById(this.sidePositionX + "_" + this.sidePositionY).style.backgroundImage = "url('img/yl_right.png')";
+        else if(this.color2 == "blue")
+            document.getElementById(this.sidePositionX + "_" + this.sidePositionY).style.backgroundImage = "url('img/bl_right.png')";
     },
     randColor: function(){
         let clr = Math.floor(Math.random() * 3);
-        if(clr == 0) return "red";
+        if(clr == 0) return "brown";
         else if(clr == 1) return "yellow";
         else return "blue";
     },
@@ -77,8 +89,10 @@ let pill = {
             if(document.getElementById(newId1).className == "empty"){
                 document.getElementById(newId1).className = document.getElementById(id1).className;
                 document.getElementById(newId1).style.backgroundColor = document.getElementById(id1).style.backgroundColor;
+                document.getElementById(newId1).style.backgroundImage = document.getElementById(id1).style.backgroundImage;
                 document.getElementById(id1).className = "empty";
-                document.getElementById(id1).style.backgroundColor = "white";
+                document.getElementById(id1).style.backgroundColor = "";
+                document.getElementById(id1).style.backgroundImage = "";
                 pill.atLeastOnePulledDown = true;
             }
         }
@@ -99,12 +113,16 @@ let pill = {
             || document.getElementById(newId2).className == document.getElementById(id1).className)){
                 document.getElementById(newId1).className = document.getElementById(id1).className;
                 document.getElementById(newId1).style.backgroundColor = document.getElementById(id1).style.backgroundColor;
+                document.getElementById(newId1).style.backgroundImage = document.getElementById(id1).style.backgroundImage;
                 document.getElementById(id1).className = "empty";
-                document.getElementById(id1).style.backgroundColor = "white";
+                document.getElementById(id1).style.backgroundColor = "";
+                document.getElementById(id1).style.backgroundImage = "";
                 document.getElementById(newId2).className = document.getElementById(id2).className;
                 document.getElementById(newId2).style.backgroundColor = document.getElementById(id2).style.backgroundColor;
+                document.getElementById(newId2).style.backgroundImage = document.getElementById(id2).style.backgroundImage;
                 document.getElementById(id2).className = "empty";
-                document.getElementById(id2).style.backgroundColor = "white";
+                document.getElementById(id2).style.backgroundColor = "";
+                document.getElementById(id2).style.backgroundImage = "";
                 if(!pill.gravity){
                     pill.mainPositionX = parseInt(newId1.substring(0, 1));
                     pill.mainPositionY = parseInt(newId1.substring(2, newId1.length));
@@ -119,16 +137,7 @@ let pill = {
                     pill.atLeastOnePulledDown = true;
             }
             else if(!pill.gravity){
-                if(newId1 == "3_1" && newId2 == "4_1"){
-                    console.log("GAME OVER");
-                    if(main.score > localStorage.getItem("top")){
-                        localStorage.setItem("top", main.score);
-                    }
-                    main.GAMEOVER = true;
-                }   
-                else{
-                    pill.delete4();
-                }
+                pill.delete4();
             } 
         }
         else if(!pill.gravity){
@@ -137,7 +146,7 @@ let pill = {
     },
     delete4: function(){
         let toDeleteArr = new Array();
-        let id;
+        let id, classname;
         for(let i = 0; i < 8; i++){
             for(let j = 0; j < 16; j++){
                 id = i + "_" + j;
@@ -166,24 +175,62 @@ let pill = {
                 id = toDeleteArr[i];
                 if(document.getElementById(id).className == "virus"){
                     main.score += 100;
-                    document.getElementById("p1").innerHTML = "TOP: " + localStorage.getItem("top") + "<br>SCORE: " + main.score;
+                    main.updateScore();
+                    if(document.getElementById(id).style.backgroundColor == "brown")
+                        document.getElementById(id).style.backgroundImage = "url('img/br_x.png')";
+                    else if(document.getElementById(id).style.backgroundColor == "yellow")
+                        document.getElementById(id).style.backgroundImage = "url('img/yl_x.png')";
+                    else if(document.getElementById(id).style.backgroundColor == "blue")
+                        document.getElementById(id).style.backgroundImage = "url('img/bl_x.png')";
                 }
+                else{
+                    if(document.getElementById(id).style.backgroundColor == "brown")
+                        document.getElementById(id).style.backgroundImage = "url('img/br_o.png')";
+                    else if(document.getElementById(id).style.backgroundColor == "yellow")
+                        document.getElementById(id).style.backgroundImage = "url('img/yl_o.png')";
+                    else if(document.getElementById(id).style.backgroundColor == "blue")
+                        document.getElementById(id).style.backgroundImage = "url('img/bl_o.png')";
+                }
+                classname = document.getElementById(id).className;
                 document.getElementById(id).className = "empty";
-                document.getElementById(id).style.backgroundColor = "white";
-                document.getElementById(id).innerHTML = "";
+                if(document.getElementsByClassName(classname).length == 1 && classname != "virus"){
+                    if(document.getElementsByClassName(classname)[0].style.backgroundColor == "brown")
+                        document.getElementsByClassName(classname)[0].style.backgroundImage = "url('img/br_dot.png')";
+                    else if(document.getElementsByClassName(classname)[0].style.backgroundColor == "yellow")
+                        document.getElementsByClassName(classname)[0].style.backgroundImage = "url('img/yl_dot.png')";
+                    else if(document.getElementsByClassName(classname)[0].style.backgroundColor == "blue")
+                        document.getElementsByClassName(classname)[0].style.backgroundImage = "url('img/bl_dot.png')";
+                }
+                setTimeout(pill.delete, 50, id);
             }
-            setTimeout(pill.gravityForce, 50);
+            setTimeout(pill.gravityForce, 100);
         }
         else{
             if(document.getElementsByClassName("virus").length == 0){
                 console.log("STAGE COMPLETED");
+                document.getElementById("sc").style.display = "block";
                 if(main.score > localStorage.getItem("top")){
                     localStorage.setItem("top", main.score);
                 }
             }
+            else if(document.getElementById("3_0").className != "empty" || document.getElementById("4_0").className != "empty"){
+                console.log("GAME OVER");
+                document.getElementById("go").style.display = "block";
+                document.getElementById("go_dr").style.display = "block";
+                if(main.score > localStorage.getItem("top")){
+                    localStorage.setItem("top", main.score);
+                }
+                main.GAMEOVER = true;
+            }
             else
                 pill.new();
         }
+    },
+    delete: function(id){
+        document.getElementById(id).style.backgroundColor = "";
+        document.getElementById(id).style.backgroundImage = "";
+        document.getElementById("virus1").src = "img/cyfry/" + Math.floor(document.getElementsByClassName("virus").length / 10) + ".png";
+        document.getElementById("virus2").src = "img/cyfry/" + document.getElementsByClassName("virus").length % 10 + ".png";
     },
     gravityForce: function(){
         pill.gravity = true;
@@ -231,12 +278,16 @@ let pill = {
             || document.getElementById(newId1).className == document.getElementById(id2).className)){
                 document.getElementById(newId2).className = document.getElementById(id2).className;
                 document.getElementById(newId2).style.backgroundColor = document.getElementById(id2).style.backgroundColor;
+                document.getElementById(newId2).style.backgroundImage = document.getElementById(id2).style.backgroundImage;
                 document.getElementById(id2).className = "empty";
-                document.getElementById(id2).style.backgroundColor = "white";
+                document.getElementById(id2).style.backgroundColor = "";
+                document.getElementById(id2).style.backgroundImage = "";
                 document.getElementById(newId1).className = document.getElementById(id1).className;
                 document.getElementById(newId1).style.backgroundColor = document.getElementById(id1).style.backgroundColor;
+                document.getElementById(newId1).style.backgroundImage = document.getElementById(id1).style.backgroundImage;
                 document.getElementById(id1).className = "empty";
-                document.getElementById(id1).style.backgroundColor = "white";
+                document.getElementById(id1).style.backgroundColor = "";
+                document.getElementById(id1).style.backgroundImage = "";
                 pill.mainPositionX = parseInt(newId1.substring(0, 1));
                 pill.mainPositionY = parseInt(newId1.substring(2, newId1.length));
                 pill.sidePositionX = parseInt(newId2.substring(0, 1));
@@ -256,12 +307,16 @@ let pill = {
             || document.getElementById(newId2).className == document.getElementById(id1).className)){
                 document.getElementById(newId1).className = document.getElementById(id1).className;
                 document.getElementById(newId1).style.backgroundColor = document.getElementById(id1).style.backgroundColor;
+                document.getElementById(newId1).style.backgroundImage = document.getElementById(id1).style.backgroundImage;
                 document.getElementById(id1).className = "empty";
-                document.getElementById(id1).style.backgroundColor = "white";
+                document.getElementById(id1).style.backgroundColor = "";
+                document.getElementById(id1).style.backgroundImage = "";
                 document.getElementById(newId2).className = document.getElementById(id2).className;
                 document.getElementById(newId2).style.backgroundColor = document.getElementById(id2).style.backgroundColor;
+                document.getElementById(newId2).style.backgroundImage = document.getElementById(id2).style.backgroundImage;
                 document.getElementById(id2).className = "empty";
-                document.getElementById(id2).style.backgroundColor = "white";
+                document.getElementById(id2).style.backgroundColor = "";
+                document.getElementById(id2).style.backgroundImage = "";
                 pill.mainPositionX = parseInt(newId1.substring(0, 1));
                 pill.mainPositionY = parseInt(newId1.substring(2, newId1.length));
                 pill.sidePositionX = parseInt(newId2.substring(0, 1));
@@ -279,9 +334,12 @@ let pill = {
             if(document.getElementById(newId2).className == "empty"){
                 document.getElementById(newId2).className = document.getElementById(id2).className;
                 document.getElementById(newId2).style.backgroundColor = document.getElementById(id1).style.backgroundColor;
+                document.getElementById(newId2).style.backgroundImage = document.getElementById(id1).style.backgroundImage.substring(0, 11) + '_up.png")';
                 document.getElementById(id1).style.backgroundColor = document.getElementById(id2).style.backgroundColor;
+                document.getElementById(id1).style.backgroundImage = document.getElementById(id2).style.backgroundImage.substring(0, 11) + '_down.png")';
                 document.getElementById(id2).className = "empty";
-                document.getElementById(id2).style.backgroundColor = "white";
+                document.getElementById(id2).style.backgroundColor = "";
+                document.getElementById(id2).style.backgroundImage = "";
                 pill.sidePositionX = parseInt(newId2.substring(0, 1));
                 pill.sidePositionY = parseInt(newId2.substring(2, newId2.length));
             }
@@ -293,10 +351,13 @@ let pill = {
                 if(document.getElementById(newId1).className == "empty"){
                     document.getElementById(newId1).className = document.getElementById(id1).className;
                     document.getElementById(newId1).style.backgroundColor = document.getElementById(id1).style.backgroundColor;
+                    document.getElementById(newId1).style.backgroundImage = document.getElementById(id1).style.backgroundImage.substring(0, 11) + '_left.png")';
                     document.getElementById(newId2).className = document.getElementById(id2).className;
                     document.getElementById(newId2).style.backgroundColor = document.getElementById(id2).style.backgroundColor;
+                    document.getElementById(newId2).style.backgroundImage = document.getElementById(id2).style.backgroundImage.substring(0, 11) + '_right.png")';
                     document.getElementById(id2).className = "empty";
-                    document.getElementById(id2).style.backgroundColor = "white";
+                    document.getElementById(id2).style.backgroundColor = "";
+                    document.getElementById(id2).style.backgroundImage = "";
                     pill.mainPositionX = parseInt(newId1.substring(0, 1));
                     pill.mainPositionY = parseInt(newId1.substring(2, newId1.length));
                     pill.sidePositionX = parseInt(newId2.substring(0, 1));
@@ -308,8 +369,11 @@ let pill = {
                 if(document.getElementById(newId2).className == "empty"){
                     document.getElementById(newId2).className = document.getElementById(id2).className;
                     document.getElementById(newId2).style.backgroundColor = document.getElementById(id2).style.backgroundColor;
+                    document.getElementById(newId2).style.backgroundImage = document.getElementById(id2).style.backgroundImage.substring(0, 11) + '_right.png")';
+                    document.getElementById(id1).style.backgroundImage = document.getElementById(id1).style.backgroundImage.substring(0, 11) + '_left.png")';
                     document.getElementById(id2).className = "empty";
-                    document.getElementById(id2).style.backgroundColor = "white";
+                    document.getElementById(id2).style.backgroundColor = "";
+                    document.getElementById(id2).style.backgroundImage = "";
                     pill.sidePositionX = parseInt(newId2.substring(0, 1));
                     pill.sidePositionY = parseInt(newId2.substring(2, newId2.length));
                 }
@@ -326,8 +390,11 @@ let pill = {
             if(document.getElementById(newId2).className == "empty"){
                 document.getElementById(newId2).className = document.getElementById(id2).className;
                 document.getElementById(newId2).style.backgroundColor = document.getElementById(id2).style.backgroundColor;
+                document.getElementById(newId2).style.backgroundImage = document.getElementById(id2).style.backgroundImage.substring(0, 11) + '_up.png")';
+                document.getElementById(id1).style.backgroundImage = document.getElementById(id1).style.backgroundImage.substring(0, 11) + '_down.png")';
                 document.getElementById(id2).className = "empty";
-                document.getElementById(id2).style.backgroundColor = "white";
+                document.getElementById(id2).style.backgroundColor = "";
+                document.getElementById(id2).style.backgroundImage = "";
                 pill.sidePositionX = parseInt(newId2.substring(0, 1));
                 pill.sidePositionY = parseInt(newId2.substring(2, newId2.length));
             }
@@ -339,10 +406,13 @@ let pill = {
                 if(document.getElementById(newId1).className == "empty"){
                     document.getElementById(newId1).className = document.getElementById(id1).className;
                     document.getElementById(newId1).style.backgroundColor = document.getElementById(id2).style.backgroundColor;
+                    document.getElementById(newId1).style.backgroundImage = document.getElementById(id2).style.backgroundImage.substring(0, 11) + '_left.png")';
                     document.getElementById(newId2).className = document.getElementById(id2).className;
                     document.getElementById(newId2).style.backgroundColor = document.getElementById(id1).style.backgroundColor;
+                    document.getElementById(newId2).style.backgroundImage = document.getElementById(id1).style.backgroundImage.substring(0, 11) + '_right.png")';
                     document.getElementById(id2).className = "empty";
-                    document.getElementById(id2).style.backgroundColor = "white";
+                    document.getElementById(id2).style.backgroundColor = "";
+                    document.getElementById(id2).style.backgroundImage = "";
                     pill.mainPositionX = parseInt(newId1.substring(0, 1));
                     pill.mainPositionY = parseInt(newId1.substring(2, newId1.length));
                     pill.sidePositionX = parseInt(newId2.substring(0, 1));
@@ -354,9 +424,12 @@ let pill = {
                 if(document.getElementById(newId2).className == "empty"){
                     document.getElementById(newId2).className = document.getElementById(id2).className;
                     document.getElementById(newId2).style.backgroundColor = document.getElementById(id1).style.backgroundColor;
+                    document.getElementById(newId2).style.backgroundImage = document.getElementById(id1).style.backgroundImage.substring(0, 11) + '_right.png")';
                     document.getElementById(id1).style.backgroundColor = document.getElementById(id2).style.backgroundColor;
+                    document.getElementById(id1).style.backgroundImage = document.getElementById(id2).style.backgroundImage.substring(0, 11) + '_left.png")';
                     document.getElementById(id2).className = "empty";
-                    document.getElementById(id2).style.backgroundColor = "white";
+                    document.getElementById(id2).style.backgroundColor = "";
+                    document.getElementById(id2).style.backgroundImage = "";
                     pill.sidePositionX = parseInt(newId2.substring(0, 1));
                     pill.sidePositionY = parseInt(newId2.substring(2, newId2.length));
                 }
