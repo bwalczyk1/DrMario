@@ -11,15 +11,10 @@ let pill = {
     pressingKey: false,
     gravity: false,
     atLeastOnePulledDown: false,
-    start: function(){
-        document.body.addEventListener("keydown", pill.checkKey);
-        document.body.addEventListener("keyup", ()=>{
-            this.pressingKey = false;
-        });
-        this.new();
-    },
+    flying: false,
+    deleting: false,
     checkKey: function(e){
-        if(!main.GAMEOVER && !pill.falling && !pill.pressingKey){
+        if(!main.GAMEOVER && !pill.falling && !pill.pressingKey && !pill.flying && !pill.deleting){
             var x = e.keyCode;
             if(x == 39){
                 pill.pressingKey = true;
@@ -48,6 +43,8 @@ let pill = {
         this.create();
         this.falling = false;
         this.gravity = false;
+        this.flying = false;
+        this.deleting = false;
         setTimeout(this.move2, 600);
     },
     create: function(){
@@ -56,8 +53,6 @@ let pill = {
         this.mainPositionY = 0;
         this.sidePositionX = 4;
         this.sidePositionY = 0;
-        this.color1 = this.randColor();
-        this.color2 = this.randColor();
         document.getElementById(this.mainPositionX + "_" + this.mainPositionY).className = this.id.toString();
         document.getElementById(this.mainPositionX + "_" + this.mainPositionY).style.backgroundColor = this.color1;
         if(this.color1 == "brown")
@@ -145,6 +140,7 @@ let pill = {
         }
     },
     delete4: function(){
+        pill.deleting = true;
         let toDeleteArr = new Array();
         let id, classname;
         for(let i = 0; i < 8; i++){
@@ -217,13 +213,18 @@ let pill = {
                 console.log("GAME OVER");
                 document.getElementById("go").style.display = "block";
                 document.getElementById("go_dr").style.display = "block";
+                clearInterval(main.bigVirusesInterval);
+                main.bigVirusesFrame = 0;
+                main.bigVirusesInterval = setInterval(main.bigVirusesGO, 300);
                 if(main.score > localStorage.getItem("top")){
                     localStorage.setItem("top", main.score);
                 }
                 main.GAMEOVER = true;
             }
-            else
-                pill.new();
+            else{
+                pill.flying = true;
+                main.flyingPillInterval = setInterval(main.flyingPill, 15);
+            }
         }
     },
     delete: function(id){

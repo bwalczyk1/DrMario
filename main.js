@@ -1,12 +1,56 @@
 "use strict";
 let main = {
     GAMEOVER: false,
-    level: 5,
+    level: 0,
     score: 0,
+    flyingPillFrame: 1,
+    flyingPillPositions: [
+        [10, 3], [10, 3],
+        [9, 2], [9, 2],
+        [8, 1], [8, 1],
+        [7, 1], [7, 1],
+        [6, 1], [6, 1],
+        [5, 1], [5, 1],
+        [4, 1], [4, 1],
+        [3, 1], [3, 1],
+        [2, 1], [2, 1],
+        [1, 2], [1, 2],
+        [0, 2], [0, 3], [0, 4], [0, 5], [0, 6]
+    ],
+    flyingPillInterval: 0,
+    bigVirusesFrame: 0,
+    bigVirusesPositions: [
+        [1, 4],
+        [1, 5],
+        [2, 6],
+        [2, 7],
+        [3, 7],
+        [4, 7],
+        [5, 7],
+        [6, 7],
+        [7, 6],
+        [7, 5],
+        [7, 4],
+        [7, 3],
+        [6, 2],
+        [5, 2],
+        [4, 2],
+        [3, 2],
+        [2, 3],
+        [1, 4]
+    ],
+    bigVirusBrPos: 0,
+    bigVirusBlPos: 6,
+    bigVirusYlPos: 12,
+    bigVirusesInterval: 0,
     load: function(){
         if(!localStorage.getItem("top"))
             localStorage.setItem("top", 0);
         document.body.style.position = "relative";
+        document.addEventListener("keydown", pill.checkKey);
+        document.addEventListener("keyup", ()=>{
+            pill.pressingKey = false;
+        });
         let pf = document.createElement("img");
         pf.src = "img/pf.png";
         pf.style.position = "absolute";
@@ -29,10 +73,28 @@ let main = {
                 td.style.border = "0";
                 td.style.borderCollapse = "collapse";
                 td.style.padding = "0";
-                td.style.fontSize = "10px";
             }
         }
         document.body.appendChild(tab);
+        let tab2 = document.createElement("table");
+        tab2.style.borderCollapse = "collapse";
+        tab2.style.position = "absolute";
+        tab2.style.top = "20px";
+        tab2.style.left = "340px";
+        for(let i = 0; i < 8; i++){
+            let tr = tab2.appendChild(document.createElement("tr"));
+            for(let j = 0; j < 12; j++){
+                let td = tr.appendChild(document.createElement("td"));
+                td.id = "_" + j + "_" + i;
+                td.style.width = "16px";
+                td.style.height = "16px";
+                td.style.backgroundSize = "16px 16px";
+                td.style.border = "0";
+                td.style.borderCollapse = "collapse";
+                td.style.padding = "0";
+            }
+        }
+        document.body.appendChild(tab2);
         for(let i = 7; i >= 1; i--){
             let top1 = document.createElement("img");
             top1.id = "top" + (8 - i);
@@ -95,7 +157,34 @@ let main = {
         virus2.style.top = "355px";
         virus2.style.left = "597px";
         document.body.appendChild(virus2);
-        pill.start();
+        let bigVirusBr = document.createElement("img");
+        bigVirusBr.id = "bigVirusBr";
+        bigVirusBr.src = "img/lupa/br/2.png";
+        bigVirusBr.style.height = "48px";
+        bigVirusBr.style.position = "absolute";
+        bigVirusBr.style.top = "276px";
+        bigVirusBr.style.left = "52px";
+        document.body.appendChild(bigVirusBr);
+        let bigVirusBl = document.createElement("img");
+        bigVirusBl.id = "bigVirusBl";
+        bigVirusBl.src = "img/lupa/bl/2.png";
+        bigVirusBl.style.height = "48px";
+        bigVirusBl.style.position = "absolute";
+        bigVirusBl.style.top = "324px";
+        bigVirusBl.style.left = "116px";
+        document.body.appendChild(bigVirusBl);
+        let bigVirusYl = document.createElement("img");
+        bigVirusYl.id = "bigVirusYl";
+        bigVirusYl.src = "img/lupa/yl/2.png";
+        bigVirusYl.style.height = "48px";
+        bigVirusYl.style.position = "absolute";
+        bigVirusYl.style.top = "244px";
+        bigVirusYl.style.left = "132px";
+        document.body.appendChild(bigVirusYl);
+        main.bigVirusesInterval = setInterval(main.bigViruses, 250);
+        this.grabPill();
+        pill.flying = true;
+        main.flyingPillInterval = setInterval(main.flyingPill, 15);
     },
     createViruses: function(){
         let x, y, id;
@@ -127,5 +216,136 @@ let main = {
         for(let i = 7; i >= 1; i--){
             document.getElementById("score" + (8 - i)).src = "img/cyfry/" + ((main.score % (10 ** i) - main.score % (10 ** (i - 1))) / 10 ** (i - 1)) + ".png";
         }
+    },
+    grabPill: function(){
+        pill.color1 = pill.randColor();
+        pill.color2 = pill.randColor();
+        if(pill.color1 == "brown")
+            document.getElementById("_10_3").style.backgroundImage = "url('img/br_left.png')";
+        else if(pill.color1 == "yellow")
+            document.getElementById("_10_3").style.backgroundImage = "url('img/yl_left.png')";
+        else if(pill.color1 == "blue")
+            document.getElementById("_10_3").style.backgroundImage = "url('img/bl_left.png')";
+        if(pill.color2 == "brown")
+            document.getElementById("_11_3").style.backgroundImage = "url('img/br_right.png')";
+        else if(pill.color2 == "yellow")
+            document.getElementById("_11_3").style.backgroundImage = "url('img/yl_right.png')";
+        else if(pill.color2 == "blue")
+            document.getElementById("_11_3").style.backgroundImage = "url('img/bl_right.png')";
+        document.getElementById("_11_4").style.backgroundImage = "url('img/hands/up_1.png')";
+        document.getElementById("_11_5").style.backgroundImage = "url('img/hands/up_2.png')";
+        document.getElementById("_11_6").style.backgroundImage = "url('img/hands/up_3.png')";
+        
+    },
+    flyingPill: function(){
+        let i = main.flyingPillFrame;
+        document.getElementById("_" + main.flyingPillPositions[i - 1][0] + "_" + main.flyingPillPositions[i - 1][1]).style.backgroundImage = "";
+        document.getElementById("_" + (main.flyingPillPositions[i - 1][0] + 1) + "_" + main.flyingPillPositions[i - 1][1]).style.backgroundImage = "";
+        document.getElementById("_" + main.flyingPillPositions[i - 1][0] + "_" + (main.flyingPillPositions[i - 1][1] - 1)).style.backgroundImage = "";
+        let imageBase1, imageBase2;
+        if(pill.color1 == "brown")
+            imageBase1 = "url('img/br";
+        else if(pill.color1 == "yellow")
+            imageBase1 = "url('img/yl";
+        else if(pill.color1 == "blue")
+            imageBase1 = "url('img/bl";
+        if(pill.color2 == "brown")
+            imageBase2 = "url('img/br";
+        else if(pill.color2 == "yellow")
+            imageBase2 = "url('img/yl";
+        else if(pill.color2 == "blue")
+            imageBase2 = "url('img/bl";
+        if(i <= 20){
+            if(i % 4 == 0){
+                document.getElementById("_" + main.flyingPillPositions[i][0] + "_" + main.flyingPillPositions[i][1]).style.backgroundImage = imageBase1 + "_left.png')";
+                document.getElementById("_" + (main.flyingPillPositions[i][0] + 1) + "_" + main.flyingPillPositions[i][1]).style.backgroundImage = imageBase2 + "_right.png')";
+            }
+            else if(i % 4 == 1){
+                document.getElementById("_" + main.flyingPillPositions[i][0] + "_" + main.flyingPillPositions[i][1]).style.backgroundImage = imageBase1 + "_down.png')";
+                document.getElementById("_" + main.flyingPillPositions[i][0] + "_" + (main.flyingPillPositions[i][1] - 1)).style.backgroundImage = imageBase2 + "_up.png')";
+            }
+            else if(i % 4 == 2){
+                document.getElementById("_" + main.flyingPillPositions[i][0] + "_" + main.flyingPillPositions[i][1]).style.backgroundImage = imageBase2 + "_left.png')";
+                document.getElementById("_" + (main.flyingPillPositions[i][0] + 1) + "_" + main.flyingPillPositions[i][1]).style.backgroundImage = imageBase1 + "_right.png')";
+            }
+            else if(i % 4 == 3){
+                document.getElementById("_" + main.flyingPillPositions[i][0] + "_" + main.flyingPillPositions[i][1]).style.backgroundImage = imageBase2 + "_down.png')";
+                document.getElementById("_" + main.flyingPillPositions[i][0] + "_" + (main.flyingPillPositions[i][1] - 1)).style.backgroundImage = imageBase1 + "_up.png')";
+            }
+        }
+        else{
+            document.getElementById("_" + main.flyingPillPositions[i][0] + "_" + main.flyingPillPositions[i][1]).style.backgroundImage = imageBase1 + "_left.png')";
+            document.getElementById("_" + (main.flyingPillPositions[i][0] + 1) + "_" + main.flyingPillPositions[i][1]).style.backgroundImage = imageBase2 + "_right.png')";
+        }
+        if(i == 4){
+            document.getElementById("_11_4").style.backgroundImage = "";
+            document.getElementById("_10_5").style.backgroundImage = "url('img/hands/middle11.png')";
+            document.getElementById("_11_5").style.backgroundImage = "url('img/hands/middle12.png')";
+            document.getElementById("_10_6").style.backgroundImage = "url('img/hands/middle21.png')";
+            document.getElementById("_11_6").style.backgroundImage = "url('img/hands/middle22.png')";
+        }
+        else if(i == 7){
+            document.getElementById("_10_5").style.backgroundImage = "";
+            document.getElementById("_11_5").style.backgroundImage = "";
+            document.getElementById("_10_6").style.backgroundImage = "";
+            document.getElementById("_11_6").style.backgroundImage = "url('img/hands/down_1.png')";
+            document.getElementById("_11_7").style.backgroundImage = "url('img/hands/down_2.png')";
+        }
+        else if(i == 24){
+            document.getElementById("_" + main.flyingPillPositions[i][0] + "_" + main.flyingPillPositions[i][1]).style.backgroundImage = "";
+            document.getElementById("_" + (main.flyingPillPositions[i][0] + 1) + "_" + main.flyingPillPositions[i][1]).style.backgroundImage = "";
+            main.flyingPillFrame = 0;
+            pill.new();
+            document.getElementById("_11_7").style.backgroundImage = "";
+            main.grabPill();
+            clearInterval(main.flyingPillInterval);
+        }
+        main.flyingPillFrame += 1;
+    },
+    bigViruses: function(){
+        let i = main.bigVirusesFrame;
+        if(i % 4 == 1){
+            document.getElementById("bigVirusBr").src = "img/lupa/br/1.png";
+            document.getElementById("bigVirusBl").src = "img/lupa/bl/1.png";
+            document.getElementById("bigVirusYl").src = "img/lupa/yl/1.png";
+        }
+        else if(i % 4 == 3){
+            document.getElementById("bigVirusBr").src = "img/lupa/br/3.png";
+            document.getElementById("bigVirusBl").src = "img/lupa/bl/3.png";
+            document.getElementById("bigVirusYl").src = "img/lupa/yl/3.png";
+        }
+        else{
+            document.getElementById("bigVirusBr").src = "img/lupa/br/2.png";
+            document.getElementById("bigVirusBl").src = "img/lupa/bl/2.png";
+            document.getElementById("bigVirusYl").src = "img/lupa/yl/2.png";
+        }
+        if(i % 4 == 0){
+            document.getElementById("bigVirusBr").style.top = (212 + main.bigVirusesPositions[(main.bigVirusBrPos + (i / 4)) % 18][1] * 16) + "px";
+            document.getElementById("bigVirusBr").style.left = (36 + main.bigVirusesPositions[(main.bigVirusBrPos + (i / 4)) % 18][0] * 16) + "px";
+            document.getElementById("bigVirusBl").style.top = (212 + main.bigVirusesPositions[(main.bigVirusBlPos + (i / 4)) % 18][1] * 16) + "px";
+            document.getElementById("bigVirusBl").style.left = (36 + main.bigVirusesPositions[(main.bigVirusBlPos + (i / 4)) % 18][0] * 16) + "px";
+            document.getElementById("bigVirusYl").style.top = (212 + main.bigVirusesPositions[(main.bigVirusYlPos + (i / 4)) % 18][1] * 16) + "px";
+            document.getElementById("bigVirusYl").style.left = (36 + main.bigVirusesPositions[(main.bigVirusYlPos + (i / 4)) % 18][0] * 16) + "px";
+        }
+        main.bigVirusesFrame += 1;
+    },
+    bigVirusesGO: function(){
+        let i = main.bigVirusesFrame;
+        if(i == 1){
+            document.getElementById("bigVirusBl").style.left = (parseInt(document.getElementById("bigVirusBl").style.left) + 1) + "px";
+        }
+        if(i % 2 == 1){
+            document.getElementById("bigVirusBr").src = "img/lupa/br/4.png";
+            document.getElementById("bigVirusBl").style.left = (parseInt(document.getElementById("bigVirusBl").style.left) + 1) + "px";
+            document.getElementById("bigVirusBl").src = "img/lupa/bl/4.png";
+            document.getElementById("bigVirusYl").src = "img/lupa/yl/4.png";
+        }
+        else{
+            document.getElementById("bigVirusBr").src = "img/lupa/br/2.png";
+            document.getElementById("bigVirusBl").style.left = (parseInt(document.getElementById("bigVirusBl").style.left) - 1) + "px";
+            document.getElementById("bigVirusBl").src = "img/lupa/bl/2.png";
+            document.getElementById("bigVirusYl").src = "img/lupa/yl/2.png";
+        }
+        main.bigVirusesFrame += 1;
     }
 }
